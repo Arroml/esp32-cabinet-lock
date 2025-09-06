@@ -1,7 +1,7 @@
 #include <WiFi.h>
 #include <time.h>
-const char *ssid = "Home";
-const char *password = "MeinAquarium1";
+const char *ssid = "test";
+const char *password = "test";
 
 NetworkServer server(80);
 
