@@ -1,24 +1,26 @@
 #include <WiFi.h>
 #include <time.h>
-const char *ssid = "test";
-const char *password = "test";
+#include "secrets.h"
+#include "webControler.h"
+
+
 
 NetworkServer server(80);
 
-int days[7] = { 13, 14, 15, 16, 17, 18, 19};
-int special[2] = {21, 22};
+int days[7] = { 13, 14, 15, 16, 17, 18, 19 };
+int special[2] = { 21, 22 };
 
-const char* ntpServer = "pool.ntp.org";
+const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 3600;
 const int daylightOffset_sec = 3600;
 
-bool isOpenFromServer[7] = {false};
+bool isOpenFromServer[7] = { false };
 
 
 void setup() {
   Serial.begin(115200);
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-  for (int i= 13; i<=19; i++){
+  for (int i = 13; i <= 19; i++) {
     pinMode(i, OUTPUT);
   }
   pinMode(21, OUTPUT);
@@ -47,8 +49,9 @@ void setup() {
 
   server.begin();
 }
-unsigned long lastUpdate =0;
+unsigned long lastUpdate = 0;
 const unsigned long upadeInterval = 10000;
+WebController controler;
 
 void loop() {
   turnOnWday();
@@ -75,7 +78,8 @@ void loop() {
             client.println("Content-type:text/html");
             client.println();
             // the content of the HTTP response follows the header:
-            displayServer(client);
+            controler.displayServer(client);
+            //displayServer(client);
             // The HTTP response ends with another blank line:
             client.println();
             // break out of the while loop:
@@ -95,7 +99,7 @@ void loop() {
   }
 }
 
-void displayServer(NetworkClient client){
+void displayServer(NetworkClient client) {
   client.print("Click <a href=\"/alH\">here</a> to open ALL. <br>");
   client.print("Click <a href=\"/alL\">here</a> to close ALL. <br>");
   client.print("<br>");
@@ -114,33 +118,32 @@ void displayServer(NetworkClient client){
   client.print("Click <a href=\"/miH\">here</a> to open MITTWOCH. <br>");
   client.print("Click <a href=\"/miL\">here</a> to close MITTWOCH. <br>");
   client.print("<br>");
-    client.print("Click <a href=\"/doH\">here</a> to open DONNERSTAG. <br>");
+  client.print("Click <a href=\"/doH\">here</a> to open DONNERSTAG. <br>");
   client.print("Click <a href=\"/doL\">here</a> to close DONNERSTAG. <br>");
   client.print("<br>");
-    client.print("Click <a href=\"/frH\">here</a> to open FREITAG. <br>");
+  client.print("Click <a href=\"/frH\">here</a> to open FREITAG. <br>");
   client.print("Click <a href=\"/frL\">here</a> to close FREITAG. <br>");
   client.print("<br>");
-    client.print("Click <a href=\"/saH\">here</a> to open SAMSTAG. <br>");
+  client.print("Click <a href=\"/saH\">here</a> to open SAMSTAG. <br>");
   client.print("Click <a href=\"/saL\">here</a> to close SAMSTAG. <br>");
   client.print("<br>");
-    client.print("Click <a href=\"/soH\">here</a> to open SONNTAG. <br>");
+  client.print("Click <a href=\"/soH\">here</a> to open SONNTAG. <br>");
   client.print("Click <a href=\"/soL\">here</a> to close SONNTAG. <br>");
   client.print("<br>");
-
 }
 
-void handleServer(String currentLine){
+void handleServer(String currentLine) {
   // Check to see if the client request was "GET /H" or "GET /L":
   if (currentLine.endsWith("GET /moH")) {
     digitalWrite(days[0], HIGH);  // GET /H turns the LED on
-    isOpenFromServer[0] = true; 
+    isOpenFromServer[0] = true;
   }
   if (currentLine.endsWith("GET /moL")) {
     digitalWrite(days[0], LOW);  // GET /L turns the LED off
     isOpenFromServer[0] = false;
   }
   if (currentLine.endsWith("GET /alH")) {
-    for (int i =0; i<7; i++){
+    for (int i = 0; i < 7; i++) {
       digitalWrite(days[i], HIGH);
       isOpenFromServer[i] = true;
     }
@@ -148,7 +151,7 @@ void handleServer(String currentLine){
     digitalWrite(special[1], HIGH);
   }
   if (currentLine.endsWith("GET /alL")) {
-    for (int i =0; i<7; i++){
+    for (int i = 0; i < 7; i++) {
       digitalWrite(days[i], LOW);
       isOpenFromServer[i] = false;
     }
@@ -157,16 +160,14 @@ void handleServer(String currentLine){
   }
   if (currentLine.endsWith("GET /noH")) {
     digitalWrite(special[1], HIGH);  // GET /H turns the LED on
-
   }
   if (currentLine.endsWith("GET /noL")) {
     digitalWrite(special[1], LOW);  // GET /L turns the LED off
-
   }
-  if (currentLine.endsWith("GET /keyH")){
+  if (currentLine.endsWith("GET /keyH")) {
     digitalWrite(special[0], HIGH);
   }
-  if (currentLine.endsWith("GET /keyL")){
+  if (currentLine.endsWith("GET /keyL")) {
     digitalWrite(special[0], LOW);
   }
   if (currentLine.endsWith("GET /diH")) {
@@ -219,48 +220,53 @@ void handleServer(String currentLine){
   }
 }
 
-void turnOnWday(){
-
+void turnOnWday() {
   struct tm timeinfo;
   if (getLocalTime(&timeinfo)) {
     int wday = timeinfo.tm_wday;
-    Serial.println(wday); // 0=Sonntag, 1=Montag, ..., 6=Samstag
-    switch (wday){
-      case 0: digitalWrite(days[6], HIGH);
-      if (isOpenFromServer[5]==false){
-        digitalWrite(days[5], LOW);
-      }
-      break;
-      case 1: digitalWrite(days[0], HIGH);
-      if (isOpenFromServer[6] == false){
-        digitalWrite(days[6], LOW);
-      }
-      break;
-      case 2: digitalWrite(days[1], HIGH);
-      if (isOpenFromServer[0] == false){
-        digitalWrite(days[0], LOW);
-      }
-      break;
-      case 3: digitalWrite(days[2], HIGH);
-      if (isOpenFromServer[1] == false){
-        digitalWrite(days[1], LOW);
-      }
-      break;
-      case 4: digitalWrite(days[3], HIGH);
-      if (isOpenFromServer[2] == false){
-        digitalWrite(days[2], LOW);
-      }
-      break;
-      case 5: digitalWrite(days[4], HIGH);
-      if (isOpenFromServer[3] == false){
-        digitalWrite(days[3], LOW);
-      }
-      break;
-      case 6: digitalWrite(days[5], HIGH);
-      if (isOpenFromServer[4]== false){
-        digitalWrite(days[4], LOW);
-      }
-      break;
+    switch (wday) {
+      case 0:
+        digitalWrite(days[6], HIGH);
+        if (isOpenFromServer[5] == false) {
+          digitalWrite(days[5], LOW);
+        }
+        break;
+      case 1:
+        digitalWrite(days[0], HIGH);
+        if (isOpenFromServer[6] == false) {
+          digitalWrite(days[6], LOW);
+        }
+        break;
+      case 2:
+        digitalWrite(days[1], HIGH);
+        if (isOpenFromServer[0] == false) {
+          digitalWrite(days[0], LOW);
+        }
+        break;
+      case 3:
+        digitalWrite(days[2], HIGH);
+        if (isOpenFromServer[1] == false) {
+          digitalWrite(days[1], LOW);
+        }
+        break;
+      case 4:
+        digitalWrite(days[3], HIGH);
+        if (isOpenFromServer[2] == false) {
+          digitalWrite(days[2], LOW);
+        }
+        break;
+      case 5:
+        digitalWrite(days[4], HIGH);
+        if (isOpenFromServer[3] == false) {
+          digitalWrite(days[3], LOW);
+        }
+        break;
+      case 6:
+        digitalWrite(days[5], HIGH);
+        if (isOpenFromServer[4] == false) {
+          digitalWrite(days[4], LOW);
+        }
+        break;
     }
   }
 }
