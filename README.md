@@ -57,6 +57,7 @@ Automatically sets the GPIO pin HIGH corresponding to the current day.
 
 ```cpp
 int days[7] = {13, 14, 15, 16, 17, 18, 19}; // Monday to Sunday
+```
 
 ### Assembly 
 ![breadboard](./assets/breadboard.jpeg)
