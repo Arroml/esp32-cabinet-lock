@@ -34,6 +34,7 @@ Dementia can make it difficult to remember where valuables are stored or when ce
 - **Locks**: 12 V electronic cabinet locks (Schubstangen-Verriegelung)
 - **Transistor**: IRLZ44N (logic-level NMOS)
 - **Gate Resistor**: 330 Ω between GPIO and Gate
+- **Pull-down Resistor**: 10 kΩ between Gate and GND
 - **Power Supply**: 12 V for locks; ESP32 regulated via AMS1117
 
 ---
@@ -56,3 +57,7 @@ Automatically sets the GPIO pin HIGH corresponding to the current day.
 
 ```cpp
 int days[7] = {13, 14, 15, 16, 17, 18, 19}; // Monday to Sunday
+
+### Assembly 
+![breadboard](./assets/breadboard.jpeg)
+
