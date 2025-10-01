@@ -61,5 +61,5 @@ int days[7] = {13, 14, 15, 16, 17, 18, 19}; // Monday to Sunday
 
 ### Assembly 
 ![breadboard](./assets/breadboard.jpeg)
-![./assets/schaltung.jpeg]
+![schaltung](./assets/schaltung.jpeg)
 
