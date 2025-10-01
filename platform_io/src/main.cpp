@@ -13,7 +13,7 @@ const unsigned long resetInterval = 5 * 60 * 1000; // 5 Minuten
 
 bool isActivated = false;
 unsigned long lastActivationTime = 0;
-const unsigned long holdTime = 500; // 500 ms
+const unsigned long holdTime = 100; // 500 ms
 
 // --- Funktionserklärungen ---
 void checkButton();
